@@ -7,8 +7,8 @@ let audioOn = false;
 const SCALE = 2;
 
 // Ferro: look
-const BG = 215;          // fondo gris clarito
-const BASE_DARK = 20;    // masa casi negra
+const BG = 241;          // #F1F1F1
+const BASE_DARK = 33;    // #212121
 const EDGE_SOFT = 0.18;  // suavidad del borde
 
 function setup() {
