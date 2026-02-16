@@ -4,13 +4,15 @@ let osc;
 let blipOsc;
 let blipEnv;
 let audioOn = false;
-let gameWon = false;
 let baseHunterR = 40;
 let eatPulse = 0;
+let spawnTimer = 0;
 
 // 1 = color sólido real, sin interpolación visual al escalar
 const SCALE = 1;
 const INITIAL_BALL_COUNT = 7;
+const TARGET_FLOATING_BALLS = 10;
+const SPAWN_EVERY_FRAMES = 24;
 
 // Flat 2D palette
 const BG = 255;          // #FFFFFF
@@ -18,7 +20,8 @@ const SHAPE_COLOR = 33;  // #212121
 const FUSION_TOUCH_FACTOR = 1.35; // ajusta colision para que coincida con contacto visual metaball
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  const cnv = createCanvas(windowWidth, windowHeight);
+  cnv.elt.oncontextmenu = () => false;
   pixelDensity(1);
   noSmooth();
 
@@ -45,10 +48,8 @@ function setup() {
 function draw() {
   // 1) Movimiento de bolas
   updateBalls(pg);
-  if (!gameWon) {
-    eatTouchedBalls();
-    gameWon = balls.length <= 1;
-  }
+  eatTouchedBalls();
+  spawnFloatingBalls(pg);
 
   // 2) Render ferrofluido en el buffer
   renderFerro(pg);
@@ -69,13 +70,6 @@ function draw() {
     eatPulse *= 0.82;
   }
 
-  if (gameWon) {
-    noStroke();
-    fill(SHAPE_COLOR);
-    textAlign(CENTER, CENTER);
-    textSize(22);
-    text("You ate all balls - click to restart", width / 2, 36);
-  }
 }
 
 function renderFerro(g) {
@@ -155,12 +149,13 @@ function eatTouchedBalls() {
 }
 
 function mousePressed() {
+  if (mouseButton === RIGHT) {
+    resetHunterBall();
+    return false;
+  }
+
   userStartAudio();
   audioOn = true;
-
-  if (gameWon) {
-    initGame();
-  }
 }
 
 function windowResized() {
@@ -204,5 +199,22 @@ function initGame() {
     balls.push(createBall(pg, i === 0));
   }
   baseHunterR = balls[0].r;
-  gameWon = false;
+  spawnTimer = 0;
+}
+
+function resetHunterBall() {
+  if (!balls.length) return;
+  balls[0].r = baseHunterR;
+  eatPulse = 0;
+}
+
+function spawnFloatingBalls(g) {
+  const floatingCount = balls.length - 1;
+  if (floatingCount >= TARGET_FLOATING_BALLS) return;
+
+  spawnTimer++;
+  if (spawnTimer < SPAWN_EVERY_FRAMES) return;
+  spawnTimer = 0;
+
+  balls.push(createBall(g));
 }
