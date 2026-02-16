@@ -2,9 +2,12 @@ let balls = [];
 let pg; // buffer para render
 let osc;
 let audioOn = false;
+let gameWon = false;
+let baseHunterR = 40;
 
 // 1 = color sólido real, sin interpolación visual al escalar
 const SCALE = 1;
+const INITIAL_BALL_COUNT = 7;
 
 // Flat 2D palette
 const BG = 255;          // #FFFFFF
@@ -20,16 +23,7 @@ function setup() {
   pg.pixelDensity(1);
   pg.noSmooth();
 
-  // bolas (metaballs)
-  for (let i = 0; i < 7; i++) {
-    balls.push({
-      x: random(pg.width),
-      y: random(pg.height),
-      r: random(30, 55),
-      vx: random(-0.6, 0.6),
-      vy: random(-0.6, 0.6),
-    });
-  }
+  initGame();
 
   // audio (si ya lo estabas usando)
   osc = new p5.Oscillator("sine");
@@ -40,7 +34,10 @@ function setup() {
 function draw() {
   // 1) Movimiento de bolas
   updateBalls(pg);
-  eatTouchedBalls();
+  if (!gameWon) {
+    eatTouchedBalls();
+    gameWon = balls.length <= 1;
+  }
 
   // 2) Render ferrofluido en el buffer
   renderFerro(pg);
@@ -51,12 +48,21 @@ function draw() {
 
   // 4) Audio mapping (opcional)
   if (audioOn) {
-    const freq = map(mouseX, 0, width, 120, 900, true);
-    const amp = map(mouseY, height, 0, 0, 0.35, true);
+    const hunter = balls[0];
+    const growth = constrain(hunter.r / baseHunterR, 1, 6);
+    const freq = map(growth, 1, 6, 180, 70, true);
+    const amp = map(growth, 1, 6, 0.05, 0.32, true);
     osc.freq(freq, 0.05);
     osc.amp(amp, 0.05);
   }
 
+  if (gameWon) {
+    noStroke();
+    fill(SHAPE_COLOR);
+    textAlign(CENTER, CENTER);
+    textSize(22);
+    text("You ate all balls - click to restart", width / 2, 36);
+  }
 }
 
 function renderFerro(g) {
@@ -133,6 +139,10 @@ function eatTouchedBalls() {
 function mousePressed() {
   userStartAudio();
   audioOn = true;
+
+  if (gameWon) {
+    initGame();
+  }
 }
 
 function windowResized() {
@@ -143,7 +153,7 @@ function windowResized() {
   pg.pixelDensity(1);
   pg.noSmooth();
 
-  // re-escala posiciones para que no se vayan a la nada
+  // reubica bolas al nuevo tamano de pantalla
   for (const b of balls) {
     b.x = random(pg.width);
     b.y = random(pg.height);
@@ -157,4 +167,24 @@ function setGray(g, x, y, c, a) {
   g.pixels[i + 1] = c;
   g.pixels[i + 2] = c;
   g.pixels[i + 3] = a;
+}
+
+function createBall(g, isHunter = false) {
+  const r = isHunter ? random(35, 50) : random(30, 55);
+  return {
+    x: random(g.width),
+    y: random(g.height),
+    r,
+    vx: random(-0.6, 0.6),
+    vy: random(-0.6, 0.6),
+  };
+}
+
+function initGame() {
+  balls = [];
+  for (let i = 0; i < INITIAL_BALL_COUNT; i++) {
+    balls.push(createBall(pg, i === 0));
+  }
+  baseHunterR = balls[0].r;
+  gameWon = false;
 }
