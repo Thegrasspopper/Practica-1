@@ -9,7 +9,6 @@ const SCALE = 2;
 // Ferro: look
 const BG = 241;          // #F1F1F1
 const BASE_DARK = 33;    // #212121
-const EDGE_SOFT = 0.18;  // suavidad del borde
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -82,23 +81,12 @@ function renderFerro(g) {
         f += (b.r * b.r) / d2;
       }
 
-      // Suavizado de borde tipo "smoothstep"
-      // a = 0 fuera, 1 dentro
-      const a = smoothstep(threshold - EDGE_SOFT, threshold + EDGE_SOFT, f);
-
-      // Si no hay masa, fondo directo
-      if (a <= 0.001) {
+      // Bordes duros: solo dentro/fuera, sin degradados ni volumen.
+      if (f < threshold) {
         setGray(g, x, y, BG, 255);
         continue;
       }
-
-      // Look 2D plano: sin luces ni volumen
-      let col = BASE_DARK;
-
-      // mezcla con fondo por alpha (bordes suaves)
-      col = lerp(BG, col, a);
-
-      setGray(g, x, y, col, 255);
+      setGray(g, x, y, BASE_DARK, 255);
     }
   }
 
@@ -146,11 +134,3 @@ function setGray(g, x, y, c, a) {
   g.pixels[i + 2] = c;
   g.pixels[i + 3] = a;
 }
-
-function smoothstep(e0, e1, x) {
-  const t = clamp((x - e0) / (e1 - e0), 0, 1);
-  return t * t * (3 - 2 * t);
-}
-
-function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-function lerp(a, b, t) { return a + (b - a) * t; }
