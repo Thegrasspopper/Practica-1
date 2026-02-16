@@ -92,26 +92,8 @@ function renderFerro(g) {
         continue;
       }
 
-      // Sombreado “metálico”: aproximamos normal con gradiente del campo
-      const eps = 1.0;
-      const fx = fieldAt(x + eps, y, balls) - fieldAt(x - eps, y, balls);
-      const fy = fieldAt(x, y + eps, balls) - fieldAt(x, y - eps, balls);
-
-      // normal (no hace falta perfecta)
-      const nx = -fx;
-      const ny = -fy;
-      const nz = 3.5; // “altura” fake (sube brillo)
-
-      // luz desde arriba-izquierda
-      const lx = -0.6, ly = -0.7, lz = 1.0;
-
-      const ndotl = clamp((nx*lx + ny*ly + nz*lz) / (mag3(nx,ny,nz) * mag3(lx,ly,lz)), 0, 1);
-
-      // brillo especular sutil
-      const spec = Math.pow(ndotl, 10);
-
-      // color final: masa casi negra con highlights
-      let col = BASE_DARK + 55 * ndotl + 85 * spec;
+      // Look 2D plano: sin luces ni volumen
+      let col = BASE_DARK;
 
       // mezcla con fondo por alpha (bordes suaves)
       col = lerp(BG, col, a);
@@ -121,17 +103,6 @@ function renderFerro(g) {
   }
 
   g.updatePixels();
-}
-
-function fieldAt(x, y, ballsArr) {
-  let f = 0;
-  for (const b of ballsArr) {
-    const dx = x - b.x;
-    const dy = y - b.y;
-    const d2 = dx * dx + dy * dy + 0.0001;
-    f += (b.r * b.r) / d2;
-  }
-  return f;
 }
 
 function updateBalls(g) {
@@ -183,4 +154,3 @@ function smoothstep(e0, e1, x) {
 
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function lerp(a, b, t) { return a + (b - a) * t; }
-function mag3(x, y, z) { return Math.sqrt(x*x + y*y + z*z) + 1e-9; }
