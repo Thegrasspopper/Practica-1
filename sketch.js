@@ -9,6 +9,7 @@ const SCALE = 1;
 // Flat 2D palette
 const BG = 255;          // #FFFFFF
 const SHAPE_COLOR = 33;  // #212121
+const FUSION_TOUCH_FACTOR = 1.35; // ajusta colision para que coincida con contacto visual metaball
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -93,8 +94,10 @@ function renderFerro(g) {
 
 function updateBalls(g) {
   // una bola sigue el mouse (convertido a coords del buffer)
-  balls[0].x = (mouseX / width) * g.width;
-  balls[0].y = (mouseY / height) * g.height;
+  const mx = constrain(mouseX, 0, width);
+  const my = constrain(mouseY, 0, height);
+  balls[0].x = (mx / width) * g.width;
+  balls[0].y = (my / height) * g.height;
 
   for (let i = 1; i < balls.length; i++) {
     const b = balls[i];
@@ -114,7 +117,7 @@ function eatTouchedBalls() {
     const dx = hunter.x - prey.x;
     const dy = hunter.y - prey.y;
     const d2 = dx * dx + dy * dy;
-    const rSum = hunter.r + prey.r;
+    const rSum = (hunter.r + prey.r) * FUSION_TOUCH_FACTOR;
 
     if (d2 <= rSum * rSum) {
       // Fusion directa: suma el tamano de la bola tocada.
