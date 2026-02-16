@@ -123,12 +123,9 @@ function eatTouchedBalls(g) {
       hunter.r = Math.sqrt(hunterArea + preyArea);
       hunter.r = Math.min(hunter.r, 140);
 
-      // Reaparece la bola comida en otra posicion.
-      prey.x = random(g.width);
-      prey.y = random(g.height);
-      prey.r = random(20, 45);
-      prey.vx = random(-0.6, 0.6);
-      prey.vy = random(-0.6, 0.6);
+      // La bola tocada se elimina (comida).
+      balls.splice(i, 1);
+      i--;
     }
   }
 }
