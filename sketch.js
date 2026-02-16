@@ -20,8 +20,7 @@ const SHAPE_COLOR = 33;  // #212121
 const FUSION_TOUCH_FACTOR = 1.35; // ajusta colision para que coincida con contacto visual metaball
 
 function setup() {
-  const cnv = createCanvas(windowWidth, windowHeight);
-  cnv.elt.oncontextmenu = () => false;
+  createCanvas(windowWidth, windowHeight);
   pixelDensity(1);
   noSmooth();
 
@@ -149,13 +148,13 @@ function eatTouchedBalls() {
 }
 
 function mousePressed() {
-  if (mouseButton === RIGHT) {
-    resetHunterBall();
-    return false;
-  }
-
   userStartAudio();
   audioOn = true;
+}
+
+function doubleClicked() {
+  resetHunterBall();
+  return false;
 }
 
 function windowResized() {
