@@ -4,6 +4,7 @@ let osc;
 let audioOn = false;
 let gameWon = false;
 let baseHunterR = 40;
+let eatPulse = 0;
 
 // 1 = color sólido real, sin interpolación visual al escalar
 const SCALE = 1;
@@ -26,7 +27,7 @@ function setup() {
   initGame();
 
   // audio (si ya lo estabas usando)
-  osc = new p5.Oscillator("sine");
+  osc = new p5.Oscillator("square");
   osc.start();
   osc.amp(0);
 }
@@ -50,10 +51,14 @@ function draw() {
   if (audioOn) {
     const hunter = balls[0];
     const growth = constrain(hunter.r / baseHunterR, 1, 6);
-    const freq = map(growth, 1, 6, 180, 70, true);
-    const amp = map(growth, 1, 6, 0.05, 0.32, true);
-    osc.freq(freq, 0.05);
-    osc.amp(amp, 0.05);
+    const notes = [110, 147, 196, 262, 330, 392, 523, 659];
+    const idx = Math.floor(map(growth, 1, 6, 0, notes.length - 1, true));
+    const freq = notes[idx];
+    const baseAmp = map(growth, 1, 6, 0.03, 0.45, true);
+    const amp = constrain(baseAmp + eatPulse, 0, 0.65);
+    osc.freq(freq, 0.02);
+    osc.amp(amp, 0.02);
+    eatPulse *= 0.88;
   }
 
   if (gameWon) {
@@ -128,6 +133,7 @@ function eatTouchedBalls() {
     if (d2 <= rSum * rSum) {
       // Fusion directa: suma el tamano de la bola tocada.
       hunter.r += prey.r;
+      eatPulse = 0.2;
 
       // La bola tocada se elimina (comida).
       balls.splice(i, 1);
