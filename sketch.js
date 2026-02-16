@@ -7,12 +7,14 @@ let audioOn = false;
 let baseHunterR = 40;
 let eatPulse = 0;
 let spawnTimer = 0;
+let lastClickMs = 0;
 
 // 1 = color sólido real, sin interpolación visual al escalar
 const SCALE = 1;
 const INITIAL_BALL_COUNT = 7;
 const TARGET_FLOATING_BALLS = 10;
 const SPAWN_EVERY_FRAMES = 24;
+const DOUBLE_CLICK_MS = 280;
 
 // Flat 2D palette
 const BG = 255;          // #FFFFFF
@@ -148,13 +150,14 @@ function eatTouchedBalls() {
 }
 
 function mousePressed() {
+  const now = millis();
+  if (now - lastClickMs <= DOUBLE_CLICK_MS) {
+    resetHunterBall();
+  }
+  lastClickMs = now;
+
   userStartAudio();
   audioOn = true;
-}
-
-function doubleClicked() {
-  resetHunterBall();
-  return false;
 }
 
 function windowResized() {
