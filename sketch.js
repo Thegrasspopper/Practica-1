@@ -1,10 +1,10 @@
 let balls = [];
-let pg; // buffer para render suave
+let pg; // buffer para render
 let osc;
 let audioOn = false;
 
-// Ajusta calidad/performance (2 = más calidad, 3 = más rápido)
-const SCALE = 2;
+// 1 = color sólido real, sin interpolación visual al escalar
+const SCALE = 1;
 
 // Ferro: look
 const BG = 241;          // #F1F1F1
@@ -13,9 +13,11 @@ const BASE_DARK = 33;    // #212121
 function setup() {
   createCanvas(windowWidth, windowHeight);
   pixelDensity(1);
+  noSmooth();
 
   pg = createGraphics(Math.floor(width / SCALE), Math.floor(height / SCALE));
   pg.pixelDensity(1);
+  pg.noSmooth();
 
   // bolas (metaballs)
   for (let i = 0; i < 7; i++) {
@@ -38,7 +40,7 @@ function draw() {
   // 1) Render ferrofluido en el buffer
   renderFerro(pg);
 
-  // 2) Dibujar al canvas grande (suave)
+  // 2) Dibujar al canvas grande
   background(BG);
   image(pg, 0, 0, width, height);
 
@@ -115,9 +117,11 @@ function mousePressed() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  noSmooth();
 
   pg = createGraphics(Math.floor(width / SCALE), Math.floor(height / SCALE));
   pg.pixelDensity(1);
+  pg.noSmooth();
 
   // re-escala posiciones para que no se vayan a la nada
   for (const b of balls) {
