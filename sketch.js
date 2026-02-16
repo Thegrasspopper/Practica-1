@@ -6,9 +6,9 @@ let audioOn = false;
 // 1 = color sólido real, sin interpolación visual al escalar
 const SCALE = 1;
 
-// Ferro: look
-const BG = 241;          // #F1F1F1
-const BASE_DARK = 33;    // #212121
+// Flat 2D palette
+const BG = 255;          // #FFFFFF
+const SHAPE_COLOR = 33;  // #212121
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -55,11 +55,6 @@ function draw() {
     osc.amp(amp, 0.05);
   }
 
-  // texto sutil
-  noStroke();
-  fill(0, 80);
-  textSize(13);
-  text("Click para activar sonido", 16, height - 16);
 }
 
 function renderFerro(g) {
@@ -88,7 +83,7 @@ function renderFerro(g) {
         setGray(g, x, y, BG, 255);
         continue;
       }
-      setGray(g, x, y, BASE_DARK, 255);
+      setGray(g, x, y, SHAPE_COLOR, 255);
     }
   }
 
