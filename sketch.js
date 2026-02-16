@@ -1,6 +1,8 @@
 let balls = [];
 let pg; // buffer para render
 let osc;
+let blipOsc;
+let blipEnv;
 let audioOn = false;
 let gameWon = false;
 let baseHunterR = 40;
@@ -30,6 +32,14 @@ function setup() {
   osc = new p5.Oscillator("square");
   osc.start();
   osc.amp(0);
+
+  // sonido corto de "fusion" al comer una bola
+  blipOsc = new p5.Oscillator("triangle");
+  blipOsc.start();
+  blipOsc.amp(0);
+  blipEnv = new p5.Envelope();
+  blipEnv.setADSR(0.005, 0.07, 0.0, 0.05);
+  blipEnv.setRange(0.7, 0);
 }
 
 function draw() {
@@ -50,15 +60,13 @@ function draw() {
   // 4) Audio mapping (opcional)
   if (audioOn) {
     const hunter = balls[0];
-    const growth = constrain(hunter.r / baseHunterR, 1, 6);
-    const notes = [110, 147, 196, 262, 330, 392, 523, 659];
-    const idx = Math.floor(map(growth, 1, 6, 0, notes.length - 1, true));
-    const freq = notes[idx];
-    const baseAmp = map(growth, 1, 6, 0.03, 0.45, true);
+    const growth = constrain(hunter.r / baseHunterR, 1, 10);
+    const freq = map(growth, 1, 10, 900, 60, true);
+    const baseAmp = map(growth, 1, 10, 0.04, 0.6, true);
     const amp = constrain(baseAmp + eatPulse, 0, 0.65);
-    osc.freq(freq, 0.02);
-    osc.amp(amp, 0.02);
-    eatPulse *= 0.88;
+    osc.freq(freq, 0.01);
+    osc.amp(amp, 0.01);
+    eatPulse *= 0.82;
   }
 
   if (gameWon) {
@@ -134,6 +142,10 @@ function eatTouchedBalls() {
       // Fusion directa: suma el tamano de la bola tocada.
       hunter.r += prey.r;
       eatPulse = 0.2;
+      if (audioOn) {
+        blipOsc.freq(map(prey.r, 30, 55, 1200, 400, true));
+        blipEnv.play(blipOsc);
+      }
 
       // La bola tocada se elimina (comida).
       balls.splice(i, 1);
