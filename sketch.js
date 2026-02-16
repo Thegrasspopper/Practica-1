@@ -80,7 +80,7 @@ function renderFerro(g) {
 
       // Bordes duros: solo dentro/fuera, sin degradados ni volumen.
       if (f < threshold) {
-        setGray(g, x, y, BG, 255);
+        setGray(g, x, y, SHAPE_COLOR, 255);
         continue;
       }
       setGray(g, x, y, SHAPE_COLOR, 255);
