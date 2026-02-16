@@ -39,7 +39,7 @@ function setup() {
 function draw() {
   // 1) Movimiento de bolas
   updateBalls(pg);
-  eatTouchedBalls(pg);
+  eatTouchedBalls();
 
   // 2) Render ferrofluido en el buffer
   renderFerro(pg);
@@ -106,7 +106,7 @@ function updateBalls(g) {
   }
 }
 
-function eatTouchedBalls(g) {
+function eatTouchedBalls() {
   const hunter = balls[0];
 
   for (let i = 1; i < balls.length; i++) {
@@ -117,11 +117,8 @@ function eatTouchedBalls(g) {
     const rSum = hunter.r + prey.r;
 
     if (d2 <= rSum * rSum) {
-      // Conserva "masa" aproximada por area al absorber.
-      const hunterArea = hunter.r * hunter.r;
-      const preyArea = prey.r * prey.r;
-      hunter.r = Math.sqrt(hunterArea + preyArea);
-      hunter.r = Math.min(hunter.r, 140);
+      // Fusion directa: suma el tamano de la bola tocada.
+      hunter.r += prey.r;
 
       // La bola tocada se elimina (comida).
       balls.splice(i, 1);
