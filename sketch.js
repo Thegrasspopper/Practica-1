@@ -37,15 +37,16 @@ function setup() {
 }
 
 function draw() {
-  // 1) Render ferrofluido en el buffer
+  // 1) Movimiento de bolas
+  updateBalls(pg);
+  eatTouchedBalls(pg);
+
+  // 2) Render ferrofluido en el buffer
   renderFerro(pg);
 
-  // 2) Dibujar al canvas grande
+  // 3) Dibujar al canvas grande
   background(BG);
   image(pg, 0, 0, width, height);
-
-  // 3) Movimiento de bolas
-  updateBalls(pg);
 
   // 4) Audio mapping (opcional)
   if (audioOn) {
@@ -80,7 +81,7 @@ function renderFerro(g) {
 
       // Bordes duros: solo dentro/fuera, sin degradados ni volumen.
       if (f < threshold) {
-        setGray(g, x, y, SHAPE_COLOR, 255);
+        setGray(g, x, y, BG, 255);
         continue;
       }
       setGray(g, x, y, SHAPE_COLOR, 255);
@@ -102,6 +103,33 @@ function updateBalls(g) {
 
     if (b.x < 0 || b.x > g.width) b.vx *= -1;
     if (b.y < 0 || b.y > g.height) b.vy *= -1;
+  }
+}
+
+function eatTouchedBalls(g) {
+  const hunter = balls[0];
+
+  for (let i = 1; i < balls.length; i++) {
+    const prey = balls[i];
+    const dx = hunter.x - prey.x;
+    const dy = hunter.y - prey.y;
+    const d2 = dx * dx + dy * dy;
+    const rSum = hunter.r + prey.r;
+
+    if (d2 <= rSum * rSum) {
+      // Conserva "masa" aproximada por area al absorber.
+      const hunterArea = hunter.r * hunter.r;
+      const preyArea = prey.r * prey.r;
+      hunter.r = Math.sqrt(hunterArea + preyArea);
+      hunter.r = Math.min(hunter.r, 140);
+
+      // Reaparece la bola comida en otra posicion.
+      prey.x = random(g.width);
+      prey.y = random(g.height);
+      prey.r = random(20, 45);
+      prey.vx = random(-0.6, 0.6);
+      prey.vy = random(-0.6, 0.6);
+    }
   }
 }
 
